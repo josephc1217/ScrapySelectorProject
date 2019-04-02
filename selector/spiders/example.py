@@ -43,7 +43,7 @@ class ExampleSpider(scrapy.Spider):
         print(">>>josephc debug output css text1 = : %s" %cssText1)    #['Example website']
         print(">>>josephc debug output css text2 = : %s" %cssText1)    #['Example website']    
         '''
-        print('\n\n\n======josephc debug ouput begin:')
+        print('\n\n\n======josephc debug ouput begin============')
         
         imgs = response.css('img').xpath('@src').getall()
         for img in imgs:
@@ -84,4 +84,35 @@ class ExampleSpider(scrapy.Spider):
         getListByCSS2 = response.css('a[href*=image] img::attr(src)').getall()
         print(getListByCSS2)       
         
-        print('======josephc debug ouput end. \n\n\n')
+        
+        #Extensions to CSS Selectors.
+        titleText = response.css('title::text').get()
+        print('TitleText %s'%titleText)
+        
+        allTextOfImages = response.css('#images *::text').getall()   # *::text selects all descendant text nodes of the current selector context:
+        print(allTextOfImages)
+        
+        # foo::text returns no results if foo element exists, but contains no text (i.e. text is empty)
+        test1 = response.css('img::text').get()
+        print('test1 = %s'%test1)     #test1 = None
+        test2 = response.css('img::text').get(default='')
+        print('test2 = %s'%test2)
+        
+        links = response.xpath('//a[contains(@href,"image")]')
+        links.getall()
+        
+        for index, link in enumerate(links):
+            args = (index, link.xpath('@href').get(), link.xpath('img/@src').get())
+            print('Link number %d points to url %r and image %r' % args)
+        
+        print(response.xpath('//a/@href').getall())        
+        print(response.css('a::attr(href)').getall())
+        
+        print([a.attrib['href'] for a in response.css('a')])
+        
+        print(response.css('base').attrib)
+        print(response.css('base').attrib['href'])
+        
+        print('============josephc debug ouput end============ \n\n\n')
+
+
