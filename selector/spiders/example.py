@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import scrapy.cmdline
+import re
+from scrapy import Selector
 
 '''
 <html>
@@ -43,8 +45,9 @@ class ExampleSpider(scrapy.Spider):
         print(">>>josephc debug output css text1 = : %s" %cssText1)    #['Example website']
         print(">>>josephc debug output css text2 = : %s" %cssText1)    #['Example website']    
         '''
-        print('\n\n\n======josephc debug ouput begin============')
+        print('\n\n\n============josephc debug ouput begin============')
         
+        '''
         imgs = response.css('img').xpath('@src').getall()
         for img in imgs:
             print(img)
@@ -113,6 +116,60 @@ class ExampleSpider(scrapy.Spider):
         print(response.css('base').attrib)
         print(response.css('base').attrib['href'])
         
+        #Using selectors with regular expressions
+          
+        print(response.xpath('//a[contains(@href, "image")]/text()').re(r'Name:\s*(.*)'))
+        
+        '''
+        
+        divs = response.xpath('//div')        
+        for a in divs.xpath('//a'):
+            print(a.get())
+            
+        sel = Selector(text='<div class="hero shout"><time datetime="2014-07-23 19:00">Special date</time></div>')
+        print(sel.css('.shout').xpath('./time/@datetime').getall())  #TODO
+        
+        sel = Selector(text="""
+        ....:     <ul class="list">
+        ....:         <li>1</li>
+        ....:         <li>2</li>
+        ....:         <li>3</li>
+        ....:     </ul>
+        ....:     <ul class="list">
+        ....:         <li>4</li>
+        ....:         <li>5</li>
+        ....:         <li>6</li>
+        ....:     </ul>""") 
+        
+        xp = lambda x: sel.xpath(x).getall()        
+        print(xp("//li[1]"))
+        print(xp("(//li)[1]"))
+        
+        sel = Selector(text='<a href="#">Click here to go to the <strong>Next Page</strong></a>')
+        print(sel.xpath('//a//text()').getall())
+        print(sel.xpath("string(//a[1]//text())").getall())
+        
+        print(sel.xpath("//a[1]").getall())
+        print(sel.xpath("string(//a[1])").getall())
+        
+        print(sel.xpath("//a[contains(.//text(),'Next Page')]").getall())
+        
+        print(sel.xpath("//a[contains(.,'Next Page')]").getall())
+        
+        doc = u"""
+        ... <div>
+        ...     <ul>
+        ...         <li class="item-0"><a href="link1.html">first item</a></li>
+        ...         <li class="item-1"><a href="link2.html">second item</a></li>
+        ...         <li class="item-inactive"><a href="link3.html">third item</a></li>
+        ...         <li class="item-1"><a href="link4.html">fourth item</a></li>
+        ...         <li class="item-0"><a href="link5.html">fifth item</a></li>
+        ...     </ul>
+        ... </div>
+        ... """  
+        
+        sel = Selector(text=doc, type='html')
+        print(sel.xpath('//li//@href').getall())
+        print(sel.xpath('//li[re:test(@class,"item-\d$")]//@href').getall())
+              
         print('============josephc debug ouput end============ \n\n\n')
-
-
